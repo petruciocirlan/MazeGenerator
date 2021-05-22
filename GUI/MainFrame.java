@@ -1,3 +1,6 @@
+package GUI;
+
+import Maze.Maze;
 import Maze.MazeFactory;
 
 import javax.swing.*;
@@ -9,6 +12,8 @@ public class MainFrame extends JFrame {
     DrawingPanel canvas;
 
     MazeFactory mazeFactory;
+    Maze maze;
+    int mazeLevel;
 
     public MainFrame(MazeFactory mazeFactory) {
         super("MazeGenerator");
@@ -26,8 +31,8 @@ public class MainFrame extends JFrame {
 
         // arrange the components in the container (frame)
         // JFrame uses a BorderLayout by default
-        add(canvas, BorderLayout.CENTER);
         add(configPanel, BorderLayout.NORTH);
+        add(canvas, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
 
         // invoke the layout manager

@@ -1,3 +1,4 @@
+import GUI.MainFrame;
 import Maze.MazeFactory;
 
 public class Program {

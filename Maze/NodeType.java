@@ -1,7 +1,7 @@
 package Maze;
 
-enum NodeType {
-    START,
-    FINISH,
-    INTERMEDIARY
-};
+public enum NodeType {
+    NORMAL,
+    ENTRY,
+    EXIT
+}

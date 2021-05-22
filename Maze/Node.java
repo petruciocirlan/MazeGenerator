@@ -1,37 +1,38 @@
 package Maze;
 
+import java.util.Arrays;
+
 public class Node {
-    private NodeType type;
-    private boolean hasStaircase;
     private final boolean[] walls;
+    private NodeType type;
 
-    public Node(NodeType type, int wallCount) {
-        this.type = type;
+    public Node(int wallCount) {
         walls = new boolean[wallCount];
-    }
-
-    public void setStaircase(boolean hasStaircase) {
-        this.hasStaircase = hasStaircase;
-    }
-
-    public boolean getStaircase() {
-        return hasStaircase;
-    }
-
-    public void setType(NodeType type) {
-        this.type = type;
+        Arrays.fill(walls, true);
+        type = NodeType.NORMAL;
     }
 
     public NodeType getType() {
         return type;
     }
 
-    public void setWall(int index) {
+    public void setType(NodeType type) {
+        this.type = type;
+    }
+
+    public void setWall(int index, boolean bool) {
         assert index < walls.length;
-        walls[index] = true;
+        walls[index] = bool;
     }
 
     public boolean[] getWalls() {
         return walls;
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                ", walls=" + Arrays.toString(walls) +
+                '}';
     }
 }

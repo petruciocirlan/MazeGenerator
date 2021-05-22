@@ -5,24 +5,26 @@ public class MazeFactory {
 
     public MazeFactory() {}
 
-    public void create(String dimensions, String type, int width, int height, int levels) {
+    public void create(String algorithm, String dimensions, String type, int width, int height, int levels) {
         switch (dimensions) {
             case "2D" -> create2D(type, width, height);
             case "3D" -> create3D(width, height, levels);
-            case "Weave" -> createWeave(width, height);
         }
+
+        maze.generate(algorithm);
     }
 
     private void create2D(String type, int width, int height) {
-
+        switch (type) {
+            case "Orthogonal" -> maze = new OrthogonalMaze(width, height, 1);
+            case "Delta" -> {}
+            case "Sigma" -> {}
+            case "Theta" -> {}
+        }
     }
 
     private void create3D(int width, int height, int levels) {
-
-    }
-
-    private void createWeave(int width, int height) {
-
+        maze = new OrthogonalMaze(width, height, levels);
     }
 
     public Maze getMaze() {
