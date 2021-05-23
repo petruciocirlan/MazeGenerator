@@ -8,7 +8,6 @@ import java.util.stream.IntStream;
 
 abstract public class PathGenerator {
     Maze maze;
-    DisjointForest forests;
     List<Wall> walls = new ArrayList<>();
 
     List<Wall> destroyedWalls = new ArrayList<>();
@@ -16,50 +15,33 @@ abstract public class PathGenerator {
 
     public PathGenerator(Maze maze) {
         this.maze = maze;
-        forests = new DisjointForest(maze.nodes.size());
-        createWallsList();
     }
 
     abstract public void generatePaths();
 
-    public boolean next() {
-        if (step >= destroyedWalls.size()) return false;
+    public Wall next() {
+        if (step >= destroyedWalls.size()) return null;
 
         Wall wall = destroyedWalls.get(step);
 
-        maze.nodes.get(wall.nodeID).setWall(wall.wallIndex, false);
-        if (wall.neighbour >= 0) {
+        maze.nodes.get(wall.getNodeID()).setWall(wall.getWallIndex(), false);
+        if (wall.getNeighbour() >= 0) {
             // -2 because we're ignoring last 2 walls which are up/down
             // they are not symmetric like other walls because the walls can change in number
             // (e.g. hexagonal nodes) and it's good to know the up/down walls are always at the end
             int levelWallCount = maze.wallCount - 2;
-            int neighbourWall = (wall.wallIndex + levelWallCount / 2) % levelWallCount;
-            if (wall.wallIndex >= levelWallCount) {
-                neighbourWall = wall.wallIndex % levelWallCount;
+            int neighbourWall = (wall.getWallIndex() + levelWallCount / 2) % levelWallCount;
+            if (wall.getWallIndex() >= levelWallCount) {
+                neighbourWall = wall.getWallIndex() % levelWallCount;
                 neighbourWall = 1 - neighbourWall;
                 neighbourWall = neighbourWall + levelWallCount;
             }
-            maze.nodes.get(wall.neighbour).setWall(neighbourWall, false);
+            maze.nodes.get(wall.getNeighbour()).setWall(neighbourWall, false);
         }
 
         step++;
 
-        return true;
-    }
-
-    protected void createWallsList() {
-        for (int nodeID = 0; nodeID < maze.nodes.size(); nodeID++) {
-            for (int wallIndex = 0; wallIndex < maze.graph.get(nodeID).size(); wallIndex++) {
-                int neighbour = maze.graph.get(nodeID).get(wallIndex);
-                if (neighbour >= 0) {
-                    walls.add(new Wall(nodeID, wallIndex, neighbour));
-                }
-            }
-        }
-        Collections.shuffle(walls, maze.random);
-
-        breakOutsideWall(maze.nodeEntry);
-        breakOutsideWall(maze.nodeExit);
+        return wall;
     }
 
     public int getDestroyedWallCount() {
@@ -76,7 +58,6 @@ abstract public class PathGenerator {
         for (int direction : directions) {
             if (neighbours.get(direction) == -1) {
                 destroyedWalls.add(new Wall(nodeID, direction, neighbours.get(direction)));
-//                maze.nodes.get(nodeID).setWall(direction, false);
                 break;
             }
         }

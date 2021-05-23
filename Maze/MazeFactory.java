@@ -15,12 +15,14 @@ public class MazeFactory {
     }
 
     private void create2D(String type, int width, int height) {
-        switch (type) {
-            case "Orthogonal" -> maze = new OrthogonalMaze(width, height, 1);
-            case "Delta" -> {}
-            case "Sigma" -> {}
-            case "Theta" -> {}
-        }
+//        switch (type) {
+//            case "Orthogonal" -> maze = new OrthogonalMaze(width, height, 1);
+//            case "Delta" -> {}
+//            case "Sigma" -> {}
+//            case "Theta" -> {}
+//        }
+        assert type.equals("Orthogonal");
+        maze = new OrthogonalMaze(width, height, 1);
     }
 
     private void create3D(int width, int height, int levels) {

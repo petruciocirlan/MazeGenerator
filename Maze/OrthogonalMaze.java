@@ -48,9 +48,6 @@ public class OrthogonalMaze extends Maze {
             nodeEntry = getRandomMarginNodeId();
             nodeExit = getRandomMarginNodeId();
         } while (nodeEntry == nodeExit);
-
-        nodes.get(nodeEntry).setType(NodeType.ENTRY);
-        nodes.get(nodeExit).setType(NodeType.EXIT);
     }
 
     @Override
@@ -82,174 +79,6 @@ public class OrthogonalMaze extends Maze {
         return position;
     }
 
-//    @Override
-//    protected void generatePaths() {
-//        System.out.println("Started generating.");
-////        generateWinningPath();
-////        System.out.println("Generated winning path.");
-////        System.out.println(winningPath);
-//        breakOutsideWall(nodeEntry);
-//        breakOutsideWall(nodeExit);
-//        System.out.println("Broke walls for entry and exit.");
-////        connectRemainingNodes();
-////        System.out.println("Connected remaining nodes of maze.");
-//    }
-
-//    @Override
-//    protected void generateWinningPath() {
-//        Stack<Integer> path = new Stack<>();
-//        Stack<Integer> indexes = new Stack<>();
-//
-//        path.add(nodeEntry);
-//        indexes.add(0);
-//
-//        Set<Integer> visited = new HashSet<>();
-//        visited.add(nodeEntry);
-//
-//        Stack<List<Integer>> shuffledDirections = new Stack<>();
-//
-//        while (!path.empty() && !visited.contains(nodeExit)) {
-//            int currentNode = path.peek();
-//            int index = indexes.peek();
-//
-//            if (index == 0) { // first time going through this node's neighbours, shuffle directions
-//                /* NOTE(@petru): shuffle better; random has huge impact on performance
-//                    try to do "weighted" shuffle with preference to directions that get
-//                    us closer to the exit node
-//                 */
-//                shuffledDirections.add(getRandomWeightedDirections(currentNode));
-//            }
-//
-//            List<Integer> directions = shuffledDirections.peek();
-//            List<Integer> neighbours = graph.get(currentNode);
-//
-//            for (; index < directions.size(); index++) {
-//                int direction = directions.get(index);
-//                int neighbour = neighbours.get(direction);
-//                if (neighbour >= 0 && !visited.contains(neighbour)) {
-//                    path.push(neighbour);
-//                    indexes.push(0);
-//
-//                    nodes.get(currentNode).setWall(direction, false);
-//                    nodes.get(neighbour).setWall((direction + 2) % K_WALL_COUNT, false);
-//
-//                    visited.add(neighbour);
-//
-//                    break;
-//                }
-//            }
-//
-//
-//            if (index >= directions.size()) {
-//                path.pop();
-//                indexes.pop();
-//                shuffledDirections.pop();
-//
-//                visited.remove(currentNode);
-//
-//                if (!path.empty()) {
-//                    index = indexes.peek();
-//                    int direction = shuffledDirections.peek().get(index);
-//                    nodes.get(path.peek()).setWall(direction, true);
-//                    nodes.get(currentNode).setWall((direction + 2) % K_WALL_COUNT, true);
-//                }
-//            }
-//        }
-//
-//        assert !path.empty();
-//        assert visited.contains(nodeExit);
-//
-//        for (int nodeID : path) {
-//            nodes.get(nodeID).setType(NodeType.PATH_MAIN);
-//        }
-//
-//        winningPath = new ArrayList<>(path);
-//    }
-
-//    @Override
-//    protected List<Integer> getRandomWeightedDirections(int currentNode) {
-//        List<Integer> result = new ArrayList<>();
-//
-//
-//    }
-
-
-//    @Override
-//    protected void connectRemainingNodes() {
-//        int[] remainingNodes = IntStream
-//                .range(0, nodes.size())
-//                .filter(index -> nodes.get(index).getType() != NodeType.PATH_MAIN)
-//                .toArray();
-//
-//        for (int index = 0; index < remainingNodes.length; index++) {
-//            if (nodes.get(index).getType() != NodeType.PATH_MAIN) {
-//                connectNode(index);
-//            }
-//        }
-//    }
-//
-//    private void connectNode(int nodeStart) {
-//        Stack<Integer> path = new Stack<>();
-//        Stack<Integer> indexes = new Stack<>();
-//
-//        path.add(nodeStart);
-//        indexes.add(0);
-//
-//        Set<Integer> visited = new HashSet<>();
-//        visited.add(nodeStart);
-//
-//        Stack<List<Integer>> shuffledDirections = new Stack<>();
-//        List<Integer> generatedDirections = IntStream.range(0, K_WALL_COUNT).boxed().collect(Collectors.toList());
-//
-//        while (!path.empty() && nodes.get(path.peek()).getType() != NodeType.PATH_MAIN) {
-//            int currentNode = path.peek();
-//            int index = indexes.peek();
-//
-//            if (index == 0) {
-//                Collections.shuffle(generatedDirections, random);
-//                shuffledDirections.add(generatedDirections);
-//            }
-//
-//            List<Integer> directions = shuffledDirections.peek();
-//            List<Integer> neighbours = graph.get(currentNode);
-//
-//            for (; index < directions.size(); index++) {
-//                int direction = directions.get(index);
-//                int neighbour = neighbours.get(direction);
-//                // NOTE(@petru): remove !path.contains(neighbour) to have unreachable regions of maze
-//                if (neighbour >= 0 && !visited.contains(neighbour)) {
-//                    path.push(neighbour);
-//                    indexes.push(0);
-//
-//                    nodes.get(currentNode).setWall(direction, false);
-//                    nodes.get(neighbour).setWall((direction + 2) % K_WALL_COUNT, false);
-//
-//                    break;
-//                }
-//            }
-//
-//            if (index >= graph.get(currentNode).size()) {
-//                path.pop();
-//                indexes.pop();
-//                shuffledDirections.pop();
-//
-//                // do not un-visit node
-//
-//                // NODE(@petru): commenting the following instructions may create more cross paths
-//                if (!path.empty()) {
-//                    index = indexes.peek();
-//                    int direction = shuffledDirections.peek().get(index);
-//                    nodes.get(path.peek()).setWall(direction, true);
-//                    nodes.get(currentNode).setWall((direction + 2) % K_WALL_COUNT, true);
-//                }
-//            }
-//        }
-//
-//        for (int nodeID : path) {
-//            nodes.get(nodeID).setType(NodeType.PATH_MAIN);
-//        }
-//    }
-
     @Override
     public Node[][] getMazeLevelAsMatrix(int mazeLevel) {
         Node[][] matrix = new Node[height][width];
@@ -260,9 +89,10 @@ public class OrthogonalMaze extends Maze {
                 if (isInsideMatrix(j, i, mazeLevel)) {
                     matrix[i][j] = nodes.get(index);
                     index++;
-                }  else {
-                    matrix[i][j] = null;
                 }
+//                else {
+//                    matrix[i][j] = null;
+//                }
             }
         }
 
@@ -270,7 +100,38 @@ public class OrthogonalMaze extends Maze {
     }
 
     @Override
+    public Node getNodeByCoordinate(MazeCoordinate mazeCoordinate) {
+        int nodeID = 0;
+        nodeID += mazeCoordinate.getZ() * (width * height);
+        nodeID += mazeCoordinate.getY() * width;
+        nodeID += mazeCoordinate.getX();
+
+        assert nodeID < width * height * levels;
+
+        return nodes.get(nodeID);
+    }
+
+    @Override
     protected boolean isInsideMatrix(int x, int y, int z) {
         return (z >= 0 && z < levels) && (y >= 0 && y < height) && (x >= 0 && x < width);
+    }
+
+    @Override
+    protected boolean isOnSameLevel(int idNodeA, int idNodeB) {
+        int idDifference = Math.abs(idNodeA - idNodeB);
+        return idDifference < width * height;
+    }
+
+    @Override
+    protected MazeCoordinate getMazeCoordinate(int nodeID) {
+        int z = nodeID / (width * height);
+        nodeID %= width * height;
+
+        int y = nodeID / width;
+        nodeID %= width;
+
+        int x = nodeID;
+
+        return new MazeCoordinate(x, y, z);
     }
 }

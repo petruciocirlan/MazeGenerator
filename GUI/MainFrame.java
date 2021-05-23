@@ -13,7 +13,9 @@ public class MainFrame extends JFrame {
 
     MazeFactory mazeFactory;
     Maze maze;
-    int mazeLevel;
+
+    Integer mazeLevel;
+    final Object lock = new Object();
 
     public MainFrame(MazeFactory mazeFactory) {
         super("MazeGenerator");

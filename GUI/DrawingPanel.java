@@ -4,9 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
+import Maze.MazeCoordinate;
 import Maze.Node;
 
+import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 
 public class DrawingPanel extends JPanel {
@@ -33,50 +36,52 @@ public class DrawingPanel extends JPanel {
         setBorder(BorderFactory.createEtchedBorder());  // for fun
     }
 
-    public void animateMaze() {
+    public void animateMaze(boolean animated) {
         clear();
 
         frame.maze = frame.mazeFactory.getMaze();
-//        paintMaze(maze);
 
-        int animationDuration = 3000 / frame.maze.getDestroyedWallCount();
-        new Timer(animationDuration, e -> {
-            frame.controlPanel.btnGenerate.setEnabled(false);
-            frame.controlPanel.btnSave.setEnabled(false);
-            frame.controlPanel.btnExport.setEnabled(false);
-            frame.controlPanel.btnImport.setEnabled(false);
+        if (animated) {
+            paintMaze();
+            int animationDuration = 3000 / frame.maze.getDestroyedWallCount();
+            new Timer(animationDuration, e -> {
+                List<MazeCoordinate> updatedNodes = frame.maze.next();
+                if (updatedNodes == null) {
+                    frame.controlPanel.btnGenerate.setEnabled(true);
+                    frame.controlPanel.btnSave.setEnabled(true);
+//                    frame.controlPanel.btnExport.setEnabled(true);
+//                    frame.controlPanel.btnImport.setEnabled(true);
 
-            frame.controlPanel.btnLevelUp.setEnabled(false);
-            frame.controlPanel.btnLevelDown.setEnabled(false);
-
-            if (!frame.maze.next()) {
-                frame.controlPanel.btnGenerate.setEnabled(true);
-                frame.controlPanel.btnSave.setEnabled(true);
-                frame.controlPanel.btnExport.setEnabled(true);
-                frame.controlPanel.btnImport.setEnabled(true);
-
-                if (frame.maze.getDepth() > 1) {
-                    if (frame.mazeLevel + 1 < frame.maze.getDepth()) {
-                        frame.controlPanel.btnLevelUp.setEnabled(true);
-                    }
-                    if (frame.mazeLevel - 1 >= 0) {
-                        frame.controlPanel.btnLevelDown.setEnabled(true);
+                    ((Timer)e.getSource()).stop();
+                } else {
+                    frame.controlPanel.btnGenerate.setEnabled(false);
+                    frame.controlPanel.btnSave.setEnabled(false);
+//                frame.controlPanel.btnExport.setEnabled(false);
+//                frame.controlPanel.btnImport.setEnabled(false);
+                    for (MazeCoordinate mazeCoordinate : updatedNodes) {
+                        paintUpdate(mazeCoordinate);
                     }
                 }
-                ((Timer)e.getSource()).stop();
+            }).start();
+        } else {
+
+            while (true) {
+                if (frame.maze.next() == null) break;
             }
 
-            // TODO(@petru): instead of repainting whole maze, paint only immediate section surrounding modified node
-
             paintMaze();
-        }).start();
+        }
     }
 
     public void paintMaze() {
         clear();
 
-        Node[][] matrix = frame.maze.getMazeLevelAsMatrix(frame.mazeLevel);
-        // TODO(@petru): take into account levels
+        int level;
+        synchronized (frame.lock) {
+            level = frame.mazeLevel;
+        }
+        Node[][] matrix = frame.maze.getMazeLevelAsMatrix(level);
+
         int padding = 5;
         int cellSize = min((H - 2 * padding) / frame.maze.getHeight(), (W - 2 * padding) / frame.maze.getWidth());
         int matrixWidth = cellSize * frame.maze.getWidth();
@@ -93,33 +98,68 @@ public class DrawingPanel extends JPanel {
         repaint();
     }
 
+    public void paintUpdate(MazeCoordinate mazeCoordinate) {
+        int level;
+        synchronized (frame.lock) {
+            level = frame.mazeLevel;
+        }
+
+        if (level != mazeCoordinate.getZ()) { return; }
+
+        int padding = 5;
+        int cellSize = min((H - 2 * padding) / frame.maze.getHeight(), (W - 2 * padding) / frame.maze.getWidth());
+        int matrixWidth = cellSize * frame.maze.getWidth();
+        int matrixHeight = cellSize * frame.maze.getHeight();
+
+        int marginTop = (H - matrixHeight) / 2;
+        int marginLeft = (W - matrixWidth) / 2;
+
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(marginLeft + cellSize * mazeCoordinate.getX(), marginTop + cellSize * mazeCoordinate.getY(), cellSize, cellSize);
+
+        int lowerY = max(mazeCoordinate.getY() - 1, 0);
+        int upperY = min(mazeCoordinate.getY() + 1, frame.maze.getHeight() - 1);
+
+        int lowerX = max(mazeCoordinate.getX() - 1, 0);
+        int upperX = min(mazeCoordinate.getX() + 1, frame.maze.getWidth() - 1);
+
+        for (int y = lowerY; y <= upperY; y++) {
+            for (int x = lowerX; x <= upperX; x++) {
+                Node node = frame.maze.getNodeByCoordinate(new MazeCoordinate(x, y, level));
+                drawNode(node, cellSize, marginTop + cellSize * y, marginLeft + cellSize * x);
+            }
+        }
+
+        repaint(marginLeft + cellSize * mazeCoordinate.getX(), marginTop + cellSize * mazeCoordinate.getY(), cellSize, cellSize);
+    }
+
     private void drawNode(Node node, int cellSize, int marginTop, int marginLeft) {
         graphics.setColor(Color.BLACK);
 
         boolean[] walls = node.getWalls();
         int levelWallCount = walls.length - 2;
 
-        int cellCenterPosX = marginLeft + cellSize / 2;
-        int cellCenterPosY = marginTop + cellSize / 2;
+        Coordinate center = new Coordinate(marginLeft + cellSize / 2.0, marginTop + cellSize / 2.0);
+
+        int startingDegrees = 135;
+        int stepDegrees = -90;
 
         double radius = cellSize / 2.0;
-        int startingDegrees = 0;
-        int stepDegrees = -360;
-        switch (levelWallCount) {
-            case 4 -> {
-                startingDegrees = 135;
-                stepDegrees = -90;
-                radius = (int)Math.sqrt(radius * radius * 2.0);
-            }
-            case 6 -> {
-                startingDegrees = 120;
-                stepDegrees = -60;
-            }
-        }
+        radius = (int)Math.sqrt(radius * radius * 2.0);
+//        switch (levelWallCount) {
+//            case 4 -> {
+//                startingDegrees = 135;
+//                stepDegrees = -90;
+//                radius = (int)Math.sqrt(radius * radius * 2.0);
+//            }
+//            case 6 -> {
+//                startingDegrees = 120;
+//                stepDegrees = -60;
+//            }
+//        }
 
         float strokeWidth = cellSize * 0.15f;
         graphics.setStroke(new BasicStroke(strokeWidth));
-//        System.out.println(Arrays.toString(walls));
         int currentDegrees = startingDegrees;
         for (int wallIndex = 0; wallIndex < levelWallCount; wallIndex++) {
 
@@ -131,9 +171,7 @@ public class DrawingPanel extends JPanel {
                 double sine = Math.sin(radians);
                 double cosine = Math.cos(radians);
 
-                edgeCoordinates[indexEndpoint] = new Coordinate();
-                edgeCoordinates[indexEndpoint].posX = cellCenterPosX + cosine * radius;
-                edgeCoordinates[indexEndpoint].posY = cellCenterPosY + sine * radius;
+                edgeCoordinates[indexEndpoint] = new Coordinate(center.posX + cosine * radius, center.posY + sine * radius);
 
                 currentDegrees += stepDegrees;
             }
@@ -151,7 +189,6 @@ public class DrawingPanel extends JPanel {
         strokeWidth /= 2;
         graphics.setStroke(new BasicStroke(strokeWidth));
 
-        Coordinate center = new Coordinate(marginLeft + cellSize / 2.0, marginTop + cellSize / 2.0);
 
         Coordinate middleTop = new Coordinate();
         middleTop.posX = center.posX;
@@ -193,13 +230,8 @@ public class DrawingPanel extends JPanel {
     }
 
     private void drawEdge(Coordinate endpointA, Coordinate endpointB) {
-//        System.out.printf("Drawing line from: (%d, %d) to (%d, %d)\n", endpointA.posX, endpointA.posY, endpointB.posX, endpointB.posY);
         graphics.draw(new Line2D.Double(endpointA.posX, endpointA.posY, endpointB.posX, endpointB.posY));
-//        graphics.drawLine(endpointA.posX, endpointA.posY, endpointB.posX, endpointB.posY);
     }
-
-    @Override
-    public void update(Graphics g) { }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -207,7 +239,7 @@ public class DrawingPanel extends JPanel {
     }
 
     public void clear() {
-        graphics.setColor(Color.WHITE); //fill the image with white
+        graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, W, H);
         repaint();
     }

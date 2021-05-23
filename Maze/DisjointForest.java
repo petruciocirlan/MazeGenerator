@@ -14,7 +14,6 @@ public class DisjointForest {
     }
 
     public void unite(int forestA, int forestB) {
-//        System.out.println("Unite: " + forestA + " and " + forestB);
         int rankA = ranks.get(forestA);
         int rankB = ranks.get(forestB);
         if (rankA < rankB) {

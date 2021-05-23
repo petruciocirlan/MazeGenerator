@@ -34,29 +34,38 @@ public abstract class Maze {
     protected void generatePaths(String algorithm) {
         switch (algorithm) {
             case "Kruskal" -> pathGenerator = new KruskalPathGenerator(this);
-            case "Prim" -> pathGenerator = null;
+            case "Prim" -> pathGenerator = new PrimPathGenerator(this);
         }
 
         assert pathGenerator != null;
         pathGenerator.generatePaths();
     }
 
-    public boolean next() {
-        return pathGenerator.next();
+    public List<MazeCoordinate> next() {
+        Wall wall = pathGenerator.next();
+        if (wall == null) { return null; }
+
+        List<MazeCoordinate> updatedNodes = new ArrayList<>();
+        updatedNodes.add(getMazeCoordinate(wall.getNodeID()));
+        if (wall.getNeighbour() >= 0) {
+            updatedNodes.add(getMazeCoordinate(wall.getNeighbour()));
+        }
+
+        return updatedNodes;
     }
 
     public int getDestroyedWallCount() {
         return pathGenerator.getDestroyedWallCount();
     }
-//    abstract protected void generateWinningPath();
-
-//    abstract protected List<Integer> getRandomWeightedDirections(int currentNode);
-//    abstract protected void connectRemainingNodes();
 
 
     abstract protected void generateShape();
     abstract protected int getRandomMarginNodeId();
 
     abstract public Node[][] getMazeLevelAsMatrix(int mazeLevel);
+    abstract public Node getNodeByCoordinate(MazeCoordinate mazeCoordinate);
+
     abstract protected boolean isInsideMatrix(int x, int y, int z);
+    abstract protected boolean isOnSameLevel(int idNodeA, int idNodeB);
+    abstract protected MazeCoordinate getMazeCoordinate(int nodeID);
 }

@@ -11,7 +11,8 @@ public class ConfigPanel extends JPanel {
     JSpinner spinnerMazeLevels; // applies only for 3D
     JComboBox<String> comboMazeDimensions;   // e.g. 2D, 3D
     JComboBox<String> comboTessellation;   // applies only for 2D; e.g. Orthogonal, Delta, Sigma etc.
-    JComboBox<String> comboAlgorithm;   // applies only for 2D; e.g. Orthogonal, Delta, Sigma etc.
+    JComboBox<String> comboAlgorithm;   // Kruskal, Prim
+    JComboBox<String> comboAnimation;   // animated or instant
 
     public ConfigPanel(MainFrame frame) {
         this.frame = frame;
@@ -19,7 +20,7 @@ public class ConfigPanel extends JPanel {
     }
 
     private void init() {
-        labelMazeSize = new JLabel("Maze width:");
+        labelMazeSize = new JLabel("Maze H/W/D:");
         spinnerMazeWidth = new JSpinner(new SpinnerNumberModel(25, 3, 50, 1));
         spinnerMazeHeight = new JSpinner(new SpinnerNumberModel(20, 3, 50, 1));
         spinnerMazeLevels = new JSpinner(new SpinnerNumberModel(1, 1, 3, 1));
@@ -27,6 +28,7 @@ public class ConfigPanel extends JPanel {
         comboMazeDimensions = new JComboBox<>(new String[] {"2D", "3D"});
         comboTessellation = new JComboBox<>(new String[] {"Orthogonal", "Delta", "Sigma", "Theta"});
         comboAlgorithm = new JComboBox<>(new String[] {"Kruskal", "Prim"});
+        comboAnimation = new JComboBox<>(new String[] {"Animated", "Instant"});
 
         add(labelMazeSize);
         add(spinnerMazeWidth);
@@ -37,6 +39,7 @@ public class ConfigPanel extends JPanel {
         add(comboMazeDimensions);
         add(comboTessellation);
         add(comboAlgorithm);
+        add(comboAnimation);
 //        comboTessellation.setEnabled(true);
         comboTessellation.setEnabled(false);
 
