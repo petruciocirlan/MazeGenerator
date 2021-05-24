@@ -115,7 +115,9 @@ public class DrawingPanel extends JPanel {
         int marginLeft = (W - matrixWidth) / 2;
 
         graphics.setColor(Color.WHITE);
-        graphics.fillRect(marginLeft + cellSize * mazeCoordinate.getX(), marginTop + cellSize * mazeCoordinate.getY(), cellSize, cellSize);
+        graphics.fillRect(marginLeft + cellSize * mazeCoordinate.getX() - padding,
+                marginTop + cellSize * mazeCoordinate.getY() - padding,
+                cellSize + 2 * padding, cellSize + 2 * padding);
 
         int lowerY = max(mazeCoordinate.getY() - 1, 0);
         int upperY = min(mazeCoordinate.getY() + 1, frame.maze.getHeight() - 1);
@@ -130,7 +132,9 @@ public class DrawingPanel extends JPanel {
             }
         }
 
-        repaint(marginLeft + cellSize * mazeCoordinate.getX(), marginTop + cellSize * mazeCoordinate.getY(), cellSize, cellSize);
+        repaint(marginLeft + cellSize * mazeCoordinate.getX() - padding,
+                marginTop + cellSize * mazeCoordinate.getY() - padding,
+                cellSize + 2 * padding, cellSize + 2 * padding);
     }
 
     private void drawNode(Node node, int cellSize, int marginTop, int marginLeft) {
