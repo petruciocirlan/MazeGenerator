@@ -22,9 +22,20 @@ The "Save" button creates a `JFileChooser` popup where the user can choose where
 
 ### Maze and generation
 
+#### Maze
 The maze is represented as a graph and the path generating is implemented using Random Spanning Tree algorithms. Kruskal's and Prim's are being used.
 
 On 3D mazes, the up/down staircases (from one level to another) are seen less often than possible lateral movement (on same level). When shuffling the edges of the graph, they are given a weight; staircases have ~5% the weight of lateral movement. That is because if they had the same weight, the maze would fill up with a lot of staircases (which clutters the visual). Upward and downward staircases can be found in the same cell.
+
+#### Algorithms
+
+##### Krusal
+
+Implemented using Disjoint-Set forests with path compression and ranking for grouping optimisation.
+
+##### Prim
+
+Implemented with custom shuffling of added walls: newly added walls have more "weight" in shuffle, so that a path goes on for longer before going back to previous branches.
 
 ## Source of insipration
 
